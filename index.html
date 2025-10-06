@@ -1,214 +1,212 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creative Lab Prompt</title>
+    <title>Creative Prompt Lab: Custom Modifiers</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom Styles for Aesthetics and Responsiveness */
-        :root {
-            --bg-color: #0d1117;
-            --card-color: #161b22;
-            --border-color: #30363d;
-            --text-color: #c9d1d9;
-            --primary-color: #3b82f6; /* blue-500 */
-        }
+        @import url('https://fonts.fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            min-height: 100vh;
+            background-color: #0d1117;
+            color: #c9d1d9;
         }
         .scrollable-category {
             max-height: 250px;
             overflow-y: auto;
-            border-radius: 8px;
-            padding: 10px;
-            background-color: var(--card-color);
-            border: 1px solid var(--border-color);
+            /* Simple scrollbar styling for dark mode */
+            scrollbar-width: thin;
+            scrollbar-color: #30363d #161b22;
         }
-        /* Custom Scrollbar for dark theme */
         .scrollable-category::-webkit-scrollbar {
             width: 8px;
-            height: 8px;
-        }
-        .scrollable-category::-webkit-scrollbar-thumb {
-            background: #555;
-            border-radius: 4px;
         }
         .scrollable-category::-webkit-scrollbar-track {
-            background: #222;
+            background: #161b22;
         }
-        .pill.selected {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+        .scrollable-category::-webkit-scrollbar-thumb {
+            background-color: #30363d;
+            border-radius: 20px;
+            border: 2px solid #161b22;
+        }
+        .pill {
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
         }
         .pill:hover {
             opacity: 0.8;
-            cursor: pointer;
+            transform: translateY(-1px);
         }
-        .status-message {
+        .pill.selected {
+            background-color: #238636; /* GitHub green */
+            color: #ffffff;
+            border-color: #238636;
+        }
+        /* Custom Status Box Styling */
+        #statusMessage {
+            transition: opacity 0.3s ease-in-out;
+            border-radius: 0.75rem; /* Rounded-xl */
             padding: 1rem;
-            border-radius: 0.5rem;
-            margin-top: 1rem;
-            display: flex;
-            align-items: flex-start; /* Changed to flex-start for better multi-line content */
-            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            font-weight: 500;
         }
         .status-error {
-            background-color: #fca5a5; /* Red-300 */
-            color: #7f1d1d; /* Red-900 */
-            border: 1px solid #ef4444; /* Red-500 */
+            background-color: #991b1b; /* Red-700 */
+            color: #fee2e2; /* Red-100 */
+            border: 1px solid #dc2626; /* Red-600 */
         }
         .status-success {
-            background-color: #a7f3d0; /* Green-300 */
-            color: #065f46; /* Green-900 */
-            border: 1px solid #10b981; /* Green-500 */
+            background-color: #166534; /* Green-700 */
+            color: #dcfce7; /* Green-100 */
+            border: 1px solid #22c55e; /* Green-500 */
         }
-        .hidden {
-            display: none !important;
+
+        /* Custom Toggle Switch for Expander */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
         }
-        .card {
-            background-color: var(--card-color);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
         }
-        /* Custom toggle switch style for alignment */
-        #promptExpanderToggle:checked ~ .dot {
-            transform: translateX(100%);
-            background-color: var(--primary-color);
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #30363d;
+            transition: .4s;
+            border-radius: 34px;
         }
-        #promptExpanderToggle:checked ~ .block {
-            background-color: #60a5fa; /* blue-400 */
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #238636; /* Green */
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
         }
     </style>
 </head>
-<body class="p-4 sm:p-8">
+<body class="p-4 md:p-8">
 
-    <div id="app" class="max-w-7xl mx-auto space-y-8">
-        
-        <header class="text-center mb-10">
-            <h1 class="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-2">
-                Creative Lab Prompt
-            </h1>
-            <p class="text-gray-400 text-lg mb-1">A Unified System for AI Image Creation.</p>
-            <p class="text-sm text-gray-500">Developed by Diana Modica</p>
+    <div id="app" class="max-w-7xl mx-auto">
+        <header class="mb-8 border-b border-gray-700 pb-4">
+            <h1 class="text-4xl font-extrabold text-white text-center">🧪 Creative Prompt Lab: Custom Modifiers</h1>
+            <p class="text-center mt-2 text-gray-400">Craft your masterpiece with unlimited creative control and personalized options.</p>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
-                
-                <div class="card p-6 space-y-4">
-                    <h2 class="text-2xl font-semibold text-white">1. Core Vision & Input</h2>
-                    <textarea id="basePrompt" rows="4" class="w-full p-4 text-white bg-[#0d1117] border border-gray-700 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150" placeholder="Describe your central subject, scene, or idea. Example: A mighty griffin soaring over a neon-lit futuristic city..."></textarea>
-                    
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <input type="file" id="imageUpload" accept="image/*" class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-500 file:text-white hover:file:bg-purple-600 transition duration-150 text-sm text-gray-500 cursor-pointer w-full">
-                        <button id="uploadPromptBtn" onclick="uploadAndGeneratePrompt()" class="w-full sm:w-auto flex-shrink-0 py-2 px-4 bg-purple-700 text-white font-bold rounded-lg hover:bg-purple-800 transition duration-150 shadow-md">
-                            Analyze Image & Generate Prompt
-                        </button>
-                    </div>
 
-                    <div class="pt-4 border-t border-gray-700">
+                <section class="bg-[#161b22] p-4 rounded-xl shadow-lg border border-[#30363d] space-y-4">
+                    <h2 class="text-xl font-semibold text-white">1. Core Concept Prompt</h2>
+                    <textarea id="basePrompt" rows="3" class="w-full p-3 bg-[#0d1117] border border-[#30363d] rounded-lg focus:ring-blue-500 focus:border-blue-500 text-white resize-none" placeholder="A majestic griffin soaring over a neon-lit, futuristic Tokyo cityscape..."></textarea>
+                    
+                    <div class="mt-4 border-t border-gray-700 pt-4">
                         <div class="flex justify-between items-center mb-2">
-                            <h3 class="text-lg font-medium text-gray-300">Inspiration Prompts</h3>
-                            <button onclick="refreshPrompts()" class="text-blue-400 hover:text-blue-500 transition duration-150 text-sm flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356-2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                                New Ideas
-                            </button>
+                             <h3 class="text-lg font-medium text-gray-300">💡 Quick Prompt Ideas (Click to load)</h3>
+                             <button id="refreshPromptsBtn" onclick="refreshPrompts()" class="flex items-center space-x-1 p-2 text-sm rounded-lg bg-[#30363d] border border-[#40464d] text-gray-300 hover:bg-[#40464d] transition duration-200">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M21.5 2v6h-6"/><path d="M21.5 8l-2.414-2.414C17.5 3.737 14.837 2 12 2c-5.523 0-10 4.477-10 10s4.477 10 10 10 10-4.477 10-10"/></svg>
+                                 <span>Refresh Ideas</span>
+                             </button>
                         </div>
                         <div id="promptSuggestions" class="space-y-2">
                             </div>
                     </div>
-                </div>
-
-                <div class="card p-6 space-y-4">
-                     <h2 class="text-2xl font-semibold text-white">2. Generation Settings</h2>
-
-                    <div class="space-y-3">
-                        <h3 class="text-lg font-medium text-gray-300">Aspect Ratio</h3>
+                    
+                    <div class="flex flex-wrap gap-3 items-center border-t border-gray-700 pt-4">
+                        <label class="text-sm font-medium">Aspect Ratio:</label>
                         <div id="aspectRatioContainer" class="flex flex-wrap gap-2">
                             </div>
                     </div>
-                    
-                    <div class="space-y-4 pt-4 border-t border-gray-700">
-                        <div class="flex items-center justify-start">
-                            <label for="promptExpanderToggle" class="flex items-center cursor-pointer">
-                                <div class="relative">
-                                    <input type="checkbox" id="promptExpanderToggle" class="sr-only" checked>
-                                    <div class="block bg-gray-600 w-14 h-8 rounded-full transition"></div>
-                                    <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
-                                </div>
-                                <div class="ml-3 text-white font-medium">
-                                    AI Prompt Expander (Recommended)
-                                </div>
-                            </label>
-                        </div>
 
-                        <div class="flex justify-center">
-                            <button id="generateBtn" onclick="generateArt()" class="w-full px-8 py-3 bg-green-600 text-white text-xl font-bold rounded-xl hover:bg-green-700 transition duration-150 shadow-lg shadow-green-900/50">
-                                GENERATE AI ART
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="card p-6 space-y-4">
-                    <h2 class="text-2xl font-semibold text-white">3. Prompt Modifiers (Select to refine)</h2>
-                    <p class="text-sm text-gray-400">Select powerful modifiers. *Artist, Style, Lighting, and **Output Format** are exclusive choices.* Use the 'Add' feature to permanently save your custom options.</p>
-                    
-                    <div id="loadingCategories" class="p-4 text-center text-gray-500">
-                        Loading modifiers from your personal vault...
-                    </div>
-                    <div id="categoryContainer" class="space-y-6">
-                        </div>
-                </div>
-
-                <div class="card p-6">
-                    <div class="flex justify-center">
-                        <button id="generateBtnBottom" onclick="generateArt()" class="w-full px-8 py-3 bg-green-600 text-white text-xl font-bold rounded-xl hover:bg-green-700 transition duration-150 shadow-lg shadow-green-900/50">
-                            GENERATE AI ART
+                    <div class="mt-4 border-t border-gray-700 pt-4">
+                        <h3 class="text-lg font-medium text-white mb-2">Generate Prompt from Image</h3>
+                        <input type="file" id="imageUpload" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#30363d] file:text-white hover:file:bg-[#40464d] cursor-pointer"/>
+                        <button onclick="uploadAndGeneratePrompt()" id="uploadPromptBtn" class="mt-3 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 shadow-md">
+                            Analyze Image & Generate Prompt
                         </button>
                     </div>
+                </section>
+
+                <section class="bg-[#161b22] p-4 rounded-xl shadow-lg border border-[#30363d] space-y-6">
+                    <h2 class="text-xl font-semibold text-white">2. Creative Modifiers (8 Categories)</h2>
+                    <p class="text-sm text-gray-400">Select options below to build a hyper-detailed prompt. (Exclusive selection for Style, Artist, Lighting). **Use the fields below to permanently add your own options!**</p>
+
+                    <div id="categoryContainer" class="grid md:grid-cols-2 gap-6">
+                        <div id="loadingCategories" class="lg:col-span-2 flex justify-center items-center p-8 text-blue-400">
+                            Loading modifier data...
+                        </div>
+                    </div>
+                </section>
+
+                <div class="bg-[#0d1117] p-4 rounded-xl border border-[#30363d] flex justify-between items-center shadow-lg">
+                    <div>
+                        <h3 class="text-xl font-bold text-blue-400 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+                            Prompt Expander: Hyper-Detail Mode
+                        </h3>
+                        <p class="text-sm text-gray-500 mt-1">Activate for complex, cinematic, and technically perfect AI-engineered prompts.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="promptExpanderToggle">
+                        <span class="slider"></span>
+                    </label>
                 </div>
 
+                <button onclick="generateArt()" id="generateBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-4 px-4 rounded-xl text-xl shadow-2xl transition duration-300">
+                    GENERATE AI ART
+                </button>
             </div>
-            
+
             <div class="lg:col-span-1 space-y-6">
-                
-                <div id="statusMessage" class="status-message hidden">
+                <section class="bg-[#161b22] p-4 rounded-xl shadow-lg border border-[#30363d] h-full flex flex-col">
+                    <h2 class="text-xl font-semibold text-white mb-4">3. Generated Output</h2>
+                    <div id="outputArea" class="flex-grow flex items-center justify-center bg-[#0d1117] rounded-lg overflow-hidden min-h-[300px] relative">
+                        <div id="loadingIndicator" class="hidden absolute inset-0 bg-gray-900 bg-opacity-70 flex flex-col items-center justify-center p-4">
+                            <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <p class="mt-3 text-white text-center">Loading...</p>
+                            <p id="loadingTip" class="text-xs text-gray-400 mt-1"></p>
+                        </div>
+                        <img id="generatedImage" class="hidden w-full h-auto rounded-lg object-contain" src="https://placehold.co/600x600/161b22/c9d1d9?text=Your+Art+Appears+Here" alt="Generated AI Art" onerror="this.onerror=null; this.src='https://placehold.co/600x600/161b22/c9d1d9?text=Error+Loading+Image'" />
+                        <p id="placeholderText" class="text-gray-500 p-4 text-center">Click 'GENERATE AI ART' to see your creation.</p>
                     </div>
 
-                <div class="card p-4 flex flex-col items-center justify-center min-h-[400px]">
-                    <h2 class="text-xl font-semibold text-white mb-4">Generated Image</h2>
-                    
-                    <div id="loadingIndicator" class="hidden flex flex-col items-center justify-center h-full w-full">
-                        <svg class="animate-spin h-10 w-10 text-blue-500 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <p id="loadingTip" class="text-gray-400 text-sm text-center">Initializing power conduits...</p>
-                    </div>
-
-                    <img id="generatedImage" class="rounded-lg shadow-xl hidden" style="max-width: 100%; height: auto;" src="https://placehold.co/600x600/161b22/c9d1d9?text=Your+Vision+Manifested" alt="Generated AI Art Placeholder">
-                    
-                    <div id="placeholderText" class="text-center">
-                        <p class="text-gray-500 mt-4">Your masterpiece will appear here.</p>
-                    </div>
-
-                    <button id="downloadBtn" onclick="handleDownload()" class="mt-4 px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-150 shadow-md hidden">
-                        DOWNLOAD IMAGE (JPG)
+                    <button id="downloadBtn" onclick="handleDownload()" class="hidden w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 mt-4 rounded-lg text-lg transition duration-200 shadow-md">
+                        📥 DOWNLOAD IMAGE (Save to Device)
                     </button>
-                </div>
+                    
+                    <div id="statusMessage" class="mt-4 p-3 hidden text-sm rounded-lg"></div>
+                </section>
             </div>
-
-        </div>
+        </main>
     </div>
 
     <script type="module">
@@ -264,16 +262,6 @@
         ];
 
 
-        const ASPECT_RATIOS = [
-            { id: '1:1', ratio: '1:1', dimensions: '(Square)', default: true },
-            { id: '4:3', ratio: '4:3', dimensions: '(Classic)', default: false },
-            { id: '3:4', ratio: '3:4', dimensions: '(Portrait)', default: false },
-            { id: '16:9', ratio: '16:9', dimensions: '(Widescreen)', default: false },
-            { id: '9:16', ratio: '9:16', dimensions: '(Mobile Story)', default: false }
-        ];
-
-        let selectedAspectRatio = ASPECT_RATIOS.find(r => r.default).id;
-
         // --- Initial Seed Data (Used only once to populate the database) ---
         const SEED_DATA = {
             artist: { 
@@ -310,7 +298,7 @@
                     "Marker Illustration", "Mosaic Art", "Stained Glass", "Holographic", "Glitchcore", 
                     "Vaporwave", "Neo-Expressionist", "Maximalism", "Minimalism", "Brutalist Architecture", 
                     "Trompe-l'oeil", "Daguerreotype Photo", "Wet Plate Collodion", "Cyanotype Print", 
-                    "Lithograph", "Etching", "Mecha Design", "Biopunk", "Solarpunk", "Dieselpunk", 
+                    ""Lithograph", "Etching", "Mecha Design", "Biopunk", "Solarpunk", "Dieselpunk", 
                     "Toy Art", "Graffiti Style", "Mandala Pattern", "Zine Aesthetic", "Paper Craft", 
                     "Claymation", "Pixelated Glitch", "Fluid Dynamics", "Abstract Landscape", "Ink Splatter"
                 ]
@@ -365,16 +353,6 @@
                     "Warm Tones", "Cool Tones", "Infrared Vision", "X-ray Effect", "Light Pillars", 
                     "Ray Tracing", "Opaque Shadows", "Refraction", "Caustics", "Volumetric Fog", 
                     "Chromatic Spectrum", "High Saturation", "Desaturated", "Muted Colors", "Edge Glow"
-                ]
-            },
-            outputFormat: {
-                title: "Output Format & Line Art", 
-                prefix: "render as a line drawing", 
-                options: [
-                    "Black and White Coloring Page, thick lines, ready to print and color", 
-                    "Detailed Line Art Illustration, thin lines, no shading, high resolution", 
-                    "High-Contrast Pen and Ink Sketch, grayscale, minimalist, print quality",
-                    "Vector Outline Drawing, simple shapes, easy to color, black and white"
                 ]
             },
             background: { 
@@ -434,15 +412,24 @@
             }
         };
 
+
+        const ASPECT_RATIOS = [
+            { id: '1:1', ratio: '1:1', dimensions: '(Square)', default: true },
+            { id: '4:3', ratio: '4:3', dimensions: '(Classic)', default: false },
+            { id: '3:4', ratio: '3:4', dimensions: '(Portrait)', default: false },
+            { id: '16:9', ratio: '16:9', dimensions: '(Widescreen)', default: false },
+            { id: '9:16', ratio: '9:16', dimensions: '(Mobile Story)', default: false }
+        ];
+
+        let selectedAspectRatio = ASPECT_RATIOS.find(r => r.default).id;
+
         // --- DOM Elements ---
         const basePromptEl = document.getElementById('basePrompt');
         const generateBtn = document.getElementById('generateBtn');
-        const generateBtnBottom = document.getElementById('generateBtnBottom'); // NEW: Added bottom button element
         const uploadPromptBtn = document.getElementById('uploadPromptBtn');
         const generatedImageEl = document.getElementById('generatedImage');
         const downloadBtn = document.getElementById('downloadBtn'); 
-        // NOTE: PlaceholderText is now only the text 'Your masterpiece will appear here.'
-        const placeholderTextEl = document.getElementById('placeholderText'); 
+        const placeholderTextEl = document.getElementById('placeholderText');
         const loadingIndicatorEl = document.getElementById('loadingIndicator');
         const loadingTipEl = document.getElementById('loadingTip');
         const statusMessageEl = document.getElementById('statusMessage');
@@ -501,7 +488,7 @@
         function showStatus(type, message, duration = 15000) {
             statusMessageEl.innerHTML = message;
             
-            // Reset classes (assumes classes are handled by the HTML structure)
+            // Reset classes
             statusMessageEl.classList.remove('hidden', 'status-error', 'status-success');
             
             // Set type class
@@ -727,7 +714,6 @@
          * Renders clickable prompt suggestions based on `currentSamplePrompts`.
          */
         function renderPromptSuggestions() {
-            // This function relies on the 'promptSuggestionsEl' DOM element
             promptSuggestionsEl.innerHTML = currentSamplePrompts.map((prompt, index) => `
                 <div class="p-3 bg-[#0d1117] rounded-lg border border-[#30363d] cursor-pointer hover:border-blue-500 transition duration-150"
                     onclick="applyPromptSuggestion('${prompt.replace(/'/g, "\\'")}')">
@@ -740,7 +726,6 @@
          * Applies a selected prompt suggestion to the main textarea.
          */
         window.applyPromptSuggestion = (promptText) => {
-            // This relies on the 'basePromptEl' DOM element
             basePromptEl.value = promptText;
             showStatus('success', 'Prompt loaded! Now adjust the aspect ratio and click GENERATE AI ART.', 5000);
         };
@@ -752,7 +737,6 @@
          * Renders the aspect ratio buttons.
          */
         function renderAspectRatios() {
-            // This relies on the 'aspectRatioContainer' DOM element
             aspectRatioContainer.innerHTML = ASPECT_RATIOS.map(ratio => `
                 <button
                     id="ratio-${ratio.id.replace(':', '-')}"
@@ -777,7 +761,6 @@
          * Renders the category pill selectors using data loaded into CATEGORY_DATA, including the new add feature.
          */
         function renderCategories() {
-            // This relies on the 'categoryContainer' DOM element
             categoryContainer.innerHTML = Object.entries(CATEGORY_DATA).map(([key, data]) => {
                 const optionCount = Array.isArray(data.options) ? data.options.length : 0;
                 return `
@@ -812,9 +795,7 @@
             }
 
             // Exclusive selection for these categories to prevent overly long prompts
-            // ADD 'outputFormat' to the exclusive list for coloring book styles
-            const exclusiveCategories = ['artist', 'style', 'lighting', 'outputFormat'];
-            if (exclusiveCategories.includes(category)) {
+            if (category === 'artist' || category === 'style' || category === 'lighting') {
                 // Clear all others in the category
                 const container = document.getElementById(`pills-${category}`);
                 container.querySelectorAll('.pill.selected').forEach(el => {
@@ -926,20 +907,15 @@
             // Only include quality keywords if NOT expanding, as the LLM will add them otherwise.
             let finalPrompt = compilePrompt(!shouldExpand); 
 
-            // --- UI State: Loading ---
+            // UI State: Loading
             generatedImageEl.classList.add('hidden');
-            downloadBtn.classList.add('hidden'); 
+            downloadBtn.classList.add('hidden'); // Hide download button while generating
             placeholderTextEl.classList.add('hidden');
             loadingIndicatorEl.classList.remove('hidden');
             statusMessageEl.classList.add('hidden');
-            
-            // Disable BOTH buttons and update text
             generateBtn.disabled = true;
             generateBtn.textContent = 'Preparing Art Generation...';
-            generateBtnBottom.disabled = true;
-            generateBtnBottom.textContent = 'Preparing Art Generation...';
-            
-            lastGeneratedJpgBase64Data = null; 
+            lastGeneratedJpgBase64Data = null; // Clear previous data
             
             try {
                 // --- STEP 1: PROMPT EXPANSION ---
@@ -979,7 +955,7 @@
                 const base64PngData = result?.predictions?.[0]?.bytesBase64Encoded;
 
                 if (!base64PngData) {
-                    throw new Error("No image data returned from the API. Check prompt for restricted content.");
+                    throw new Error("No image data returned from the API.");
                 }
 
                 // Convert the returned PNG Base64 to JPEG Base64
@@ -992,19 +968,13 @@
                 generatedImageEl.style.width = '100%';
                 generatedImageEl.style.height = 'auto';
 
-                // Ensure placeholder text is hidden
-                placeholderTextEl.classList.add('hidden');
-
-                // UPDATED SAVE INSTRUCTIONS FOR BETTER ALIGNMENT
                 const saveInstructions = `
-                    <div class="flex flex-col space-y-2">
-                        <p class="text-xl font-bold text-green-900">🎉 Art Generated Successfully (No Watermark)!</p>
-                        <p class="font-bold text-lg text-green-800">SAVE INSTRUCTIONS:</p>
-                        <ul class="list-disc list-inside space-y-1 text-green-800 ml-4">
-                            <li>Click the <strong class="text-green-900">DOWNLOAD IMAGE</strong> button below.</li>
-                            <li>Your browser saves the file automatically. <strong class="text-green-900">Check your Downloads folder</strong> or notifications on your device!</li>
-                        </ul>
-                    </div>
+                    <p class="text-xl font-bold mb-2">🎉 Art Generated Successfully (No Watermark)!</p>
+                    <p class="font-bold text-green-300 text-lg">--- SAVE INSTRUCTIONS (Check Downloads) ---</p>
+                    <ul class="list-disc list-inside ml-4 mt-1 space-y-1">
+                        <li>1. Click the **DOWNLOAD IMAGE** button below.</li>
+                        <li>2. Your browser might save the file automatically. **Check your notifications or the Downloads folder** on your device!</li>
+                    </ul>
                 `;
                 showStatus('success', saveInstructions, 0); // Keep this message visible permanently
                 downloadBtn.classList.remove('hidden'); 
@@ -1012,24 +982,15 @@
             } catch (error) {
                 console.error("Art Generation Error:", error);
                 showStatus('error', `Generation failed: ${error.message}. Please check your prompt and try again.`, 10000);
-                
-                // Show a failure placeholder image instead of the old placeholder text
                 generatedImageEl.src = "https://placehold.co/600x600/161b22/c9d1d9?text=Generation+Failed";
                 generatedImageEl.classList.remove('hidden');
-                
-                // Ensure placeholder text and download button are hidden
-                placeholderTextEl.classList.add('hidden');
                 downloadBtn.classList.add('hidden');
 
             } finally {
                 // UI State: Complete
                 loadingIndicatorEl.classList.add('hidden');
-                
-                // Re-enable BOTH buttons and reset text
                 generateBtn.disabled = false;
                 generateBtn.textContent = 'GENERATE AI ART';
-                generateBtnBottom.disabled = false;
-                generateBtnBottom.textContent = 'GENERATE AI ART';
             }
         }
         window.generateArt = generateArt; // Expose to HTML
@@ -1044,7 +1005,7 @@
                 return;
             }
 
-            // UI State: Loading (relies on DOM elements)
+            // UI State: Loading
             uploadPromptBtn.disabled = true;
             uploadPromptBtn.textContent = 'Analyzing Image...';
             loadingIndicatorEl.classList.remove('hidden');
@@ -1092,7 +1053,7 @@
                     throw new Error("Could not generate prompt from image.");
                 }
 
-                // Update the main prompt input (relies on DOM element)
+                // Update the main prompt input
                 basePromptEl.value = generatedText.trim().replace(/^Prompt:\s*/i, '',); // Clean up any prefix
                 showStatus('success', 'Prompt successfully generated from image! You can now generate art or refine the prompt.', 5000);
 
@@ -1104,10 +1065,6 @@
                 loadingIndicatorEl.classList.add('hidden');
                 uploadPromptBtn.disabled = false;
                 uploadPromptBtn.textContent = 'Analyze Image & Generate Prompt';
-                // Reset to placeholder state if no image was generated
-                if (generatedImageEl.classList.contains('hidden')) {
-                     placeholderTextEl.classList.remove('hidden');
-                }
             }
         }
         window.uploadAndGeneratePrompt = uploadAndGeneratePrompt; // Expose to HTML
@@ -1138,6 +1095,8 @@
                 showStatus('error', 'Image data is not ready. Please generate art first.', 7000);
             }
         };
+
+
     </script>
 </body>
 </html>
