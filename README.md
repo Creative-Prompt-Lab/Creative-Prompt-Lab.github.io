@@ -1,5 +1,6 @@
 #Creative Prompt Lab: Custom Modifiers
 ​
+
 This is a single-file, fully responsive web application designed to help AI artists build sophisticated, hyper-detailed prompts for large image generation models (like Imagen 3.0 and Midjourney). It functions as a personalized laboratory for refining creative language and is ideal for quick deployment via services like GitHub Pages.
 
 ​Developed by Diana Modica
